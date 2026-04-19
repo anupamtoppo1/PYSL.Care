@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PYSL Care | Management System</title>
+    <title>PYSL Care | Role-Based Management</title>
     <style>
         :root {
             --hc-primary: #0056b3;
             --hc-secondary: #6c757d;
-            --hc-success: #28a745;
-            --hc-danger: #dc3545;
+            --hc-admin: #8e44ad;
+            --hc-user: #27ae60;
             --hc-light: #f8f9fa;
             --hc-dark: #343a40;
         }
@@ -22,7 +22,7 @@
         }
 
         .dashboard {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             padding: 25px;
@@ -39,19 +39,42 @@
             margin-bottom: 25px;
         }
 
-        .status-badge {
-            background: #d4edda;
-            color: #155724;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
+        .role-selector {
+            background: #eee;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Form Styling */
+        .role-btn {
+            padding: 8px 20px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .role-btn.active-admin { background: var(--hc-admin); color: white; border-color: #4b0082; }
+        .role-btn.active-user { background: var(--hc-user); color: white; border-color: #1b5e20; }
+        .role-btn.inactive { background: #ddd; color: #777; }
+
+        .view-indicator {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+
         .registration-box {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             background: var(--hc-light);
             padding: 20px;
@@ -60,86 +83,33 @@
             border: 1px solid #dee2e6;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
+        input, select { padding: 10px; border: 1px solid #ced4da; border-radius: 5px; }
 
-        label {
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--hc-dark);
-        }
-
-        input, select {
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-        }
-
-        /* Buttons */
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        .actions { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        
         .btn-register { background: var(--hc-primary); color: white; }
         .btn-display { background: var(--hc-dark); color: white; }
         .btn-search { background: var(--hc-secondary); color: white; }
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
 
-        /* Search Bar */
-        .search-container {
-            flex-grow: 1;
-            display: flex;
-            gap: 5px;
-        }
-
-        /* Table Styling */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th {
-            background-color: var(--hc-primary);
-            color: white;
-            text-align: left;
-            padding: 12px;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+        th { background-color: var(--hc-primary); color: white; text-align: left; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #dee2e6; }
         tr:nth-child(even) { background-color: #f2f2f2; }
-        tr:hover { background-color: #e2e6ea; }
 
-        .empty-msg {
-            text-align: center;
-            padding: 20px;
-            color: #999;
+        .abstraction-note {
+            font-size: 0.85rem;
+            color: #444;
+            margin-top: 15px;
+            background: #fff3e0;
+            padding: 15px;
+            border-left: 5px solid #ff9800;
+            border-radius: 4px;
         }
+
+        .confidential { color: #d32f2f; font-family: monospace; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -148,12 +118,18 @@
         <header>
             <div>
                 <h1 style="margin:0; color: var(--hc-primary);">🏥 PYSL CARE</h1>
-                <small>Hospital Management System | v2.4 Professional</small>
+                <small>Hospital Management System | Abstraction Demo</small>
             </div>
-            <div class="status-badge">● System Online</div>
+            <div id="roleIndicator" class="view-indicator active-user">User View (Limited Access)</div>
         </header>
 
-        <!-- Input Section (C++ setDetails Simulation) -->
+        <div class="role-selector">
+            <strong>System Access Level:</strong>
+            <button id="userBtn" class="role-btn active-user" onclick="setRole('user')">Staff User</button>
+            <button id="adminBtn" class="role-btn inactive" onclick="setRole('admin')">Admin</button>
+        </div>
+
+        <!-- Registration Form -->
         <div class="registration-box">
             <div class="input-group">
                 <label>Patient Name</label>
@@ -164,7 +140,11 @@
                 <input type="number" id="pAge" placeholder="Age">
             </div>
             <div class="input-group">
-                <label>Doctor</label>
+                <label>Phone Number</label>
+                <input type="text" id="pPhone" placeholder="Phone">
+            </div>
+            <div class="input-group">
+                <label>Assigned Doctor</label>
                 <select id="dName">
                     <option value="Dr. Laxmi (Cardiologist)">Dr. Laxmi (Cardiologist)</option>
                     <option value="Dr. Priya (Neurologist)">Dr. Priya (Neurologist)</option>
@@ -173,167 +153,163 @@
                 </select>
             </div>
             <div class="input-group">
-                <label>Appointment Date</label>
+                <label>Appt. Date</label>
                 <input type="date" id="aDate">
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="actions">
             <button class="btn-register" onclick="handleRegister()">➕ Register Patient</button>
-            <button class="btn-display" onclick="displayAll()">📋 Display All Records</button>
-            
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search by Patient Name..." style="flex-grow:1">
+            <button class="btn-display" onclick="displayAll()">📋 Display All</button>
+            <div style="flex-grow:1; display:flex; gap:5px;">
+                <input type="text" id="searchInput" placeholder="Search by name..." style="flex-grow:1">
                 <button class="btn-search" onclick="handleSearch()">🔍 Search</button>
             </div>
         </div>
 
-        <!-- Records Display (C++ showDetails Simulation) -->
         <div class="table-container">
             <table id="appointmentTable">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Patient Name</th>
-                        <th>Age</th>
-                        <th>Assigned Doctor</th>
-                        <th>Department</th>
-                    </tr>
+                    <tr id="tableHeader"></tr>
                 </thead>
-                <tbody id="tableBody">
-                    <!-- Data injected here -->
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
-            <div id="emptyMessage" class="empty-msg" style="display:none;">No records found.</div>
+        </div>
+        
+        <div class="abstraction-note">
+            <strong>Abstraction Summary:</strong> 
+            The <b>Doctor List</b> (including Dr. Yamini) is accessible to everyone. 
+            However, <b>Patient Sensitivity Data</b> (Age and Phone) is abstracted. 
+            Regular users see masked phone numbers (<code>********56</code>) and hidden ages to protect privacy.
         </div>
     </div>
 
     <script>
-        // --- C++ CLASS STRUCTURES ---
+        // --- OOP CLASSES ---
         class Patient {
-            constructor() { this.name = ""; this.age = 0; }
-            setDetails(n, a) { this.name = n; this.age = a; }
+            #name; #age; #phone; 
+            constructor(n, a, ph) { this.#name = n; this.#age = a; this.#phone = ph; }
+            getName() { return this.#name; }
+            getAge(role) { return (role === 'admin') ? this.#age : "CONFIDENTIAL"; }
+            getPhone(role) {
+                if (role === 'admin') return this.#phone;
+                return "********" + this.#phone.slice(-2);
+            }
         }
 
         class Doctor {
-            constructor() { this.name = ""; this.specialization = ""; }
-            setDetails(fullName) {
-                // Splits "Dr. Sharma (Cardiologist)" into Name and Spec
+            #name; #spec;
+            constructor(fullName) {
                 const parts = fullName.split(' (');
-                this.name = parts[0];
-                this.specialization = parts[1].replace(')', '');
+                this.#name = parts[0];
+                this.#spec = parts[1].replace(')', '');
             }
+            getName() { return this.#name; }
+            getSpec() { return this.#spec; }
         }
 
         class Appointment {
-            constructor() {
-                this.patient = new Patient();
-                this.doctor = new Doctor();
-                this.date = "";
-            }
-            // Logic to link components
-            setDetails(pObj, dObj, dt) {
-                this.patient = pObj;
-                this.doctor = dObj;
-                this.date = dt;
+            #patient; #doctor; #date;
+            constructor(p, d, dt) { this.#patient = p; this.#doctor = d; this.#date = dt; }
+            getDisplayData(role) {
+                return {
+                    date: this.#date,
+                    pName: this.#patient.getName(),
+                    pAge: this.#patient.getAge(role),
+                    pPhone: this.#patient.getPhone(role),
+                    dName: this.#doctor.getName(),
+                    dSpec: this.#doctor.getSpec()
+                };
             }
         }
 
-        // --- GLOBAL DATABASE (Memory) ---
+        // --- APP LOGIC ---
+        let currentRole = 'user';
         let database = [];
 
-        // --- PRE-FILL RANDOM DATA ---
-        function initRandomData() {
-            const samples = [
-                {p: "Rahul Khanna", a: 25, d: "Dr. Laxmi (Cardiologist)", dt: "2024-05-12"},
-                {p: "Sanya Malhotra", a: 31, d: "Dr. Priya (Neurologist)", dt: "2024-05-14"},
-                {p: "Amit Shah", a: 45, d: "Dr. Yamini (Diagnostics)", dt: "2024-05-15"}
-            ];
-
-            samples.forEach(data => {
-                const p = new Patient(); p.setDetails(data.p, data.a);
-                const d = new Doctor(); d.setDetails(data.d);
-                const appt = new Appointment();
-                appt.setDetails(p, d, data.dt);
-                database.push(appt);
-            });
+        function setRole(role) {
+            currentRole = role;
+            document.getElementById('roleIndicator').innerText = role === 'admin' ? "Admin View (Full Access)" : "User View (Limited Access)";
+            document.getElementById('roleIndicator').className = `view-indicator active-${role}`;
+            document.getElementById('userBtn').className = `role-btn ${role==='user'?'active-user':'inactive'}`;
+            document.getElementById('adminBtn').className = `role-btn ${role==='admin'?'active-admin':'inactive'}`;
             renderTable(database);
         }
 
-        // --- CORE FUNCTIONS ---
-
         function handleRegister() {
-            const name = document.getElementById('pName').value;
-            const age = document.getElementById('pAge').value;
-            const doc = document.getElementById('dName').value;
-            const date = document.getElementById('aDate').value;
-
-            if(!name || !age || !date) {
-                alert("Please fill all fields");
-                return;
-            }
-
-            // Create Objects (C++ Simulation)
-            const p1 = new Patient();
-            p1.setDetails(name, age);
-
-            const d1 = new Doctor();
-            d1.setDetails(doc);
-
-            const a1 = new Appointment();
-            a1.setDetails(p1, d1, date);
-
-            // Save to "Database"
-            database.push(a1);
+            const n = document.getElementById('pName').value;
+            const a = document.getElementById('pAge').value;
+            const ph = document.getElementById('pPhone').value;
+            const d = document.getElementById('dName').value;
+            const dt = document.getElementById('aDate').value;
             
-            // Clear inputs
+            if(!n || !a || !ph || !dt) return alert("Please fill all details!");
+
+            database.push(new Appointment(new Patient(n, a, ph), new Doctor(d), dt));
+            renderTable(database);
+            
+            // Reset fields
             document.getElementById('pName').value = "";
             document.getElementById('pAge').value = "";
-            
-            alert("Registration Successful!");
-            renderTable(database);
+            document.getElementById('pPhone').value = "";
         }
 
         function renderTable(dataArray) {
+            const header = document.getElementById('tableHeader');
             const tbody = document.getElementById('tableBody');
-            const emptyMsg = document.getElementById('emptyMessage');
+            
+            let hContent = `<th>Date</th><th>Patient Name</th>`;
+            if(currentRole === 'admin') hContent += `<th>Age</th>`;
+            hContent += `<th>Phone Number</th><th>Doctor</th><th>Department</th>`;
+            header.innerHTML = hContent;
+
             tbody.innerHTML = "";
-
-            if(dataArray.length === 0) {
-                emptyMsg.style.display = "block";
-                return;
-            } else {
-                emptyMsg.style.display = "none";
-            }
-
             dataArray.forEach(appt => {
-                const row = `<tr>
-                    <td>${appt.date}</td>
-                    <td><strong>${appt.patient.name}</strong></td>
-                    <td>${appt.patient.age}</td>
-                    <td>${appt.doctor.name}</td>
-                    <td><span style="color:var(--hc-primary)">${appt.doctor.specialization}</span></td>
+                const info = appt.getDisplayData(currentRole);
+                let row = `<tr>
+                    <td>${info.date}</td>
+                    <td><strong>${info.pName}</strong></td>`;
+                
+                if(currentRole === 'admin') row += `<td style="color:var(--hc-admin)">${info.pAge}</td>`;
+                
+                const phoneStyle = currentRole === 'user' ? 'confidential' : '';
+                row += `<td><span class="${phoneStyle}">${info.pPhone}</span></td>
+                    <td>${info.dName}</td>
+                    <td><span style="color:var(--hc-primary)">${info.dSpec}</span></td>
                 </tr>`;
                 tbody.innerHTML += row;
             });
         }
 
-        function displayAll() {
-            renderTable(database);
-        }
+        function displayAll() { renderTable(database); }
 
         function handleSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = database.filter(appt => 
-                appt.patient.name.toLowerCase().includes(query)
-            );
+            const filtered = database.filter(appt => appt.getDisplayData(currentRole).pName.toLowerCase().includes(query));
             renderTable(filtered);
         }
 
-        // Initialize on load
-        window.onload = initRandomData;
+        // --- DEFAULT 10 PATIENTS (Including Dr. Yamini) ---
+        window.onload = () => {
+            const defaults = [
+                {n: "Rahul Khanna", a: 24, ph: "9876543201", d: "Dr. Laxmi (Cardiologist)", dt: "2024-05-01"},
+                {n: "Priya Sharma", a: 31, ph: "8822334455", d: "Dr. Priya (Neurologist)", dt: "2024-05-02"},
+                {n: "Amit Verma", a: 45, ph: "7766554433", d: "Dr. Soumya (Surgeon)", dt: "2024-05-03"},
+                {n: "Sunita Reddy", a: 29, ph: "9900112233", d: "Dr. Yamini (Diagnostics)", dt: "2024-05-04"},
+                {n: "Vikram Rathore", a: 52, ph: "9112233445", d: "Dr. Priya (Neurologist)", dt: "2024-05-05"},
+                {n: "Ananya Rao", a: 19, ph: "8009001002", d: "Dr. Soumya (Surgeon)", dt: "2024-05-06"},
+                {n: "Kabir Singh", a: 35, ph: "7001002003", d: "Dr. Laxmi (Cardiologist)", dt: "2024-05-07"},
+                {n: "Neha Gupta", a: 42, ph: "8554433221", d: "Dr. Yamini (Diagnostics)", dt: "2024-05-08"},
+                {n: "Rohan Mehra", a: 27, ph: "9445566778", d: "Dr. Soumya (Surgeon)", dt: "2024-05-09"},
+                {n: "Ishita Bhalla", a: 38, ph: "9223344556", d: "Dr. Yamini (Diagnostics)", dt: "2024-05-10"}
+            ];
 
+            defaults.forEach(item => {
+                database.push(new Appointment(new Patient(item.n, item.a, item.ph), new Doctor(item.d), item.dt));
+            });
+
+            renderTable(database);
+        };
     </script>
 </body>
 </html>
