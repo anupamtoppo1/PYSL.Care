@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PYSL Care | Management System</title>
+    <style>
+        :root {
+            --hc-primary: #0056b3;
+            --hc-secondary: #6c757d;
+            --hc-success: #28a745;
+            --hc-danger: #dc3545;
+            --hc-light: #f8f9fa;
+            --hc-dark: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--hc-primary);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .status-badge {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Form Styling */
+        .registration-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: var(--hc-light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #dee2e6;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--hc-dark);
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        /* Buttons */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-register { background: var(--hc-primary); color: white; }
+        .btn-display { background: var(--hc-dark); color: white; }
+        .btn-search { background: var(--hc-secondary); color: white; }
+        button:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        /* Search Bar */
+        .search-container {
+            flex-grow: 1;
+            display: flex;
+            gap: 5px;
+        }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: var(--hc-primary);
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #e2e6ea; }
+
+        .empty-msg {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <header>
+            <div>
+                <h1 style="margin:0; color: var(--hc-primary);">🏥 PYSL CARE</h1>
+                <small>Hospital Management System | v2.4 Professional</small>
+            </div>
+            <div class="status-badge">● System Online</div>
+        </header>
+
+        <!-- Input Section (C++ setDetails Simulation) -->
+        <div class="registration-box">
+            <div class="input-group">
+                <label>Patient Name</label>
+                <input type="text" id="pName" placeholder="Full Name">
+            </div>
+            <div class="input-group">
+                <label>Age</label>
+                <input type="number" id="pAge" placeholder="Age">
+            </div>
+            <div class="input-group">
+                <label>Doctor</label>
+                <select id="dName">
+                    <option value="Dr. Sharma (Cardiologist)">Dr. Laxmi (Cardiologist)</option>
+                    <option value="Dr. Watson (Neurologist)">Dr. Priya (Neurologist)</option>
+                    <option value="Dr. Strange (Surgeon)">Dr. Soumya (Surgeon)</option>
+                    <option value="Dr. House (Diagnostics)">Dr. Yamini (Diagnostics)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Appointment Date</label>
+                <input type="date" id="aDate">
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn-register" onclick="handleRegister()">➕ Register Patient</button>
+            <button class="btn-display" onclick="displayAll()">📋 Display All Records</button>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search by Patient Name..." style="flex-grow:1">
+                <button class="btn-search" onclick="handleSearch()">🔍 Search</button>
+            </div>
+        </div>
+
+        <!-- Records Display (C++ showDetails Simulation) -->
+        <div class="table-container">
+            <table id="appointmentTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Patient Name</th>
+                        <th>Age</th>
+                        <th>Assigned Doctor</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data injected here -->
+                </tbody>
+            </table>
+            <div id="emptyMessage" class="empty-msg" style="display:none;">No records found.</div>
+        </div>
+    </div>
+
+    <script>
+        // --- C++ CLASS STRUCTURES ---
+        class Patient {
+            constructor() { this.name = ""; this.age = 0; }
+            setDetails(n, a) { this.name = n; this.age = a; }
+        }
+
+        class Doctor {
+            constructor() { this.name = ""; this.specialization = ""; }
+            setDetails(fullName) {
+                // Splits "Dr. Sharma (Cardiologist)" into Name and Spec
+                const parts = fullName.split(' (');
+                this.name = parts[0];
+                this.specialization = parts[1].replace(')', '');
+            }
+        }
+
+        class Appointment {
+            constructor() {
+                this.patient = new Patient();
+                this.doctor = new Doctor();
+                this.date = "";
+            }
+            // Logic to link components
+            setDetails(pObj, dObj, dt) {
+                this.patient = pObj;
+                this.doctor = dObj;
+                this.date = dt;
+            }
+        }
+
+        // --- GLOBAL DATABASE (Memory) ---
+        let database = [];
+
+        // --- PRE-FILL RANDOM DATA ---
+        function initRandomData() {
+            const samples = [
+                {p: "Rahul Khanna", a: 25, d: "Dr. Sharma (Cardiologist)", dt: "2024-05-12"},
+                {p: "Sanya Malhotra", a: 31, d: "Dr. Watson (Neurologist)", dt: "2024-05-14"},
+                {p: "Amit Shah", a: 45, d: "Dr. House (Diagnostics)", dt: "2024-05-15"}
+            ];
+
+            samples.forEach(data => {
+                const p = new Patient(); p.setDetails(data.p, data.a);
+                const d = new Doctor(); d.setDetails(data.d);
+                const appt = new Appointment();
+                appt.setDetails(p, d, data.dt);
+                database.push(appt);
+            });
+            renderTable(database);
+        }
+
+        // --- CORE FUNCTIONS ---
+
+        function handleRegister() {
+            const name = document.getElementById('pName').value;
+            const age = document.getElementById('pAge').value;
+            const doc = document.getElementById('dName').value;
+            const date = document.getElementById('aDate').value;
+
+            if(!name || !age || !date) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            // Create Objects (C++ Simulation)
+            const p1 = new Patient();
+            p1.setDetails(name, age);
+
+            const d1 = new Doctor();
+            d1.setDetails(doc);
+
+            const a1 = new Appointment();
+            a1.setDetails(p1, d1, date);
+
+            // Save to "Database"
+            database.push(a1);
+            
+            // Clear inputs
+            document.getElementById('pName').value = "";
+            document.getElementById('pAge').value = "";
+            
+            alert("Registration Successful!");
+            renderTable(database);
+        }
+
+        function renderTable(dataArray) {
+            const tbody = document.getElementById('tableBody');
+            const emptyMsg = document.getElementById('emptyMessage');
+            tbody.innerHTML = "";
+
+            if(dataArray.length === 0) {
+                emptyMsg.style.display = "block";
+                return;
+            } else {
+                emptyMsg.style.display = "none";
+            }
+
+            dataArray.forEach(appt => {
+                const row = `<tr>
+                    <td>${appt.date}</td>
+                    <td><strong>${appt.patient.name}</strong></td>
+                    <td>${appt.patient.age}</td>
+                    <td>${appt.doctor.name}</td>
+                    <td><span style="color:var(--hc-primary)">${appt.doctor.specialization}</span></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function displayAll() {
+            renderTable(database);
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = database.filter(appt => 
+                appt.patient.name.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        }
+
+        // Initialize on load
+        window.onload = initRandomData;
+
+    </script>
+</body>
+</html>
